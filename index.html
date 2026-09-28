@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KOPIGEN QUEST — Misi Dihibrid Kopi Kepahiang</title>
+  <style>
+    :root {
+      --bg-dark-green: #1B3B2B;
+      --primary-green: #2D5A27;
+      --accent-green: #4CAF50;
+      --coffee-brown: #4A2E1B;
+      --coffee-light: #8B5A2B;
+      --coffee-red: #D32F2F;
+      --cream-bg: #FDFBF7;
+      --cream-card: #F4EAD4;
+      --accent-blue: #0288D1;
+      --text-dark: #2C2C2C;
+      --text-light: #FFFFFF;
+      --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --shadow-soft: 0 8px 24px rgba(0,0,0,0.15);
+      --shadow-card: 0 4px 12px rgba(0,0,0,0.1);
+      --radius-lg: 18px;
+      --radius-md: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+
+    body {
+      background-color: var(--bg-dark-green);
+      background-image: radial-gradient(circle at 50% 50%, #2A523A 0%, #132A1E 100%);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    #game-container {
+      width: 100%;
+      max-width: 1050px;
+      min-height: 750px;
+      background: var(--cream-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 4px solid var(--coffee-light);
+    }
+
+    header {
+      background: var(--coffee-brown);
+      color: var(--text-light);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid var(--coffee-light);
+    }
+
+    .header-title { font-size: 1.1rem; font-weight: bold; color: #FFD700; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+    .header-logo-icon { height: 28px; width: auto; object-fit: contain; }
+    .nav-buttons { display: flex; gap: 10px; }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--accent-green); color: var(--text-light); }
+    .btn-brown { background: var(--coffee-light); color: var(--text-light); }
+    .btn-blue { background: var(--accent-blue); color: var(--text-light); }
+    .btn-secondary { background: #757575; color: var(--text-light); }
+
+    .screen { display: none; flex: 1; padding: 25px; flex-direction: column; overflow-y: auto; }
+    .screen.active { display: flex; }
+
+    /* Piko Dialog Box dengan Gambar Piko */
+    .piko-box {
+      background: var(--cream-card);
+      border: 2px solid var(--coffee-light);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .piko-avatar-img { 
+      width: 70px; 
+      height: 70px; 
+      object-fit: contain; 
+      flex-shrink: 0; 
+      border-radius: 50%;
+      background: #2D5A27;
+      padding: 3px;
+      border: 2px solid var(--coffee-light);
+    }
+
+    .piko-dialog { font-size: 0.95rem; color: var(--coffee-brown); line-height: 1.4; }
+
+    /* Banner Utama dengan Logo */
+    .hero-banner {
+      text-align: center;
+      padding: 30px 20px;
+      background: linear-gradient(rgba(27,59,43,0.85), rgba(74,46,27,0.85));
+      color: white;
+      border-radius: var(--radius-md);
+      margin-bottom: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .game-logo-img {
+      max-width: 320px;
+      width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .map-node {
+      background: white;
+      border: 3px solid var(--coffee-light);
+      border-radius: var(--radius-md);
+      padding: 20px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .map-node.locked { background: #E0E0E0; border-color: #9E9E9E; cursor: not-allowed; opacity: 0.6; }
+    .map-node.active-node { border-color: var(--accent-green); box-shadow: 0 0 12px rgba(76,175,80,0.5); }
+
+    .grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }
+
+    .card {
+      background: white;
+      border: 2px solid #DDD;
+      border-radius: var(--radius-md);
+      padding: 15px;
+      box-shadow: var(--shadow-card);
+      text-align: center;
+    }
+
+    .mcq-option {
+      display: block;
+      padding: 10px;
+      margin: 6px 0;
+      background: #F8F9FA;
+      border: 2px solid #DDD;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .mcq-option:hover {
+      background: #E8F5E9;
+      border-color: var(--accent-green);
+    }
+
+    .mcq-option input { margin-right: 10px; }
+
+    .drag-container {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px;
+      background: #EAEAEA;
+      border-radius: var(--radius-md);
+      min-height: 60px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+      border: 2px dashed var(--coffee-light);
+    }
+
+    .draggable-item {
+      padding: 8px 18px;
+      background: var(--coffee-light);
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      font-size: 1rem;
+      letter-spacing: 1px;
+      display: inline-block;
+    }
+
+    .draggable-item:active { cursor: grabbing; transform: scale(1.05); }
+
+    .drop-zone {
+      border: 2px dashed var(--coffee-light);
+      background: white;
+      border-radius: 6px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      font-weight: bold;
+      color: #777;
+      transition: background 0.2s;
+    }
+
+    .drop-zone.hovered, .drag-container.hovered { background: #E8F5E9; border-color: var(--accent-green); }
+
+    .punnett-table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; }
+    .punnett-table th, .punnett-table td { border: 2px solid var(--coffee-light); padding: 8px; text-align: center; vertical-align: middle; width: 20%; }
+    .punnett-table th { background: var(--cream-card); color: var(--coffee-brown); font-weight: bold; }
+
+    .cell-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .punnett-input {
+      width: 90%;
+      padding: 6px;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border: 1px solid #CCC;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+
+    .plant-preview {
+      width: 60px;
+      height: 60px;
+      margin-top: 4px;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .score-card {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+      color: #333;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 20px;
+      border: 3px solid #FFF;
+    }
+
+    .score-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--coffee-brown);
+      text-shadow: 1px 1px 0px #FFF;
+      line-height: 1;
+      margin: 10px 0;
+    }
+
+    .score-badge {
+      display: inline-block;
+      background: var(--coffee-brown);
+      color: #FFD700;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+
+    .action-bar {
+      margin-top: auto;
+      padding-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      border-top: 1px solid #E0E0E0;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      #game-container { border: none; box-shadow: none; max-width: 100%; }
+      header, .piko-box, .action-bar, .nav-buttons { display: none !important; }
+      .screen { display: block !important; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">
+      <img src="Judul Game.jpg" alt="Logo KOPIGEN QUEST" class="header-logo-icon">[cite: 1]
+      <span>KOPIGEN QUEST</span>[cite: 3]
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-brown" onclick="playBtnSound(); switchScreen('screen-map')">🗺️ Peta</button>
+      <button class="btn btn-secondary" onclick="playBtnSound(); switchScreen('screen-home')">🏠 Home</button>
+    </div>
+  </header>
+
+  <!-- 1. COVER / HOME -->
+  <div id="screen-home" class="screen active">
+    <div class="hero-banner">
+      <img src="Judul Game.jpg" alt="KOPIGEN QUEST Logo" class="game-logo-img">[cite: 1]
+      <p style="font-size: 1.1rem; font-style: italic; margin-top: 5px;">“Dari Kebun Kopi, Menjelajah Dunia Genetika!”</p>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 0 auto; width: 100%;">
+      <button class="btn btn-primary" style="justify-content: center; font-size: 1.1rem; padding: 14px;" onclick="playBtnSound(); switchScreen('screen-input-team')">▶ MULAI GAME</button>
+      <button class="btn btn-brown" style="justify-content: center;" onclick="playBtnSound(); alert('PANDUAN GAME:\n1. Kerjakan misi secara berurutan.\n2. Kartu pilihan pada Misi Drag & Drop bisa ditarik kembali ke wadahnya atau dipindahkan sesuka hati.\n3. Di Misi 3, tarik alel/gamet ke 8 kotak header Punnett Square.\n4. Masukkan genotipe untuk memunculkan gambar tanaman secara otomatis!\n5. Pada Final Mission, pilih varietas unggul hasil persilangan game dan susun kesimpulan kelompok.')">📖 PANDUAN</button>
+      <button class="btn btn-blue" style="justify-content: center;" onclick="playBtnSound(); switchScreen('screen-input-team')">👥 PILIH KELOMPOK</button>
+      <button class="btn btn-brown" style="justify-content: center;" onclick="playBtnSound(); switchScreen('screen-map')">🗺️ PETA MISI</button>
+      <button class="btn btn-secondary" style="justify-content: center;" onclick="playBtnSound(); switchScreen('screen-about')">ℹ️ TENTANG GAME</button>
+    </div>
+
+    <div style="text-align: center; margin-top: auto; padding-top: 20px; font-size: 0.85rem; color: #666;">
+      Copyright © 2026 Ibu Sri_B. All rights reserved.
+    </div>
+  </div>
+
+  <!-- 2. INPUT KELOMPOK -->
+  <div id="screen-input-team" class="screen">
+    <div class="piko-box">
+      <img src="Piko.jpg" alt="Piko" class="piko-avatar-img">[cite: 2]
+      <div class="piko-dialog">
+        <strong>Piko:</strong> “Hai, Penjelajah! Kenalkan dulu tim petualang hebatmu sebelum masuk ke perkebunan Kepahiang!”[cite: 1, 2]
+      </div>
+    </div>
+
+    <h2 style="color: var(--coffee-brown); margin-bottom: 15px;">SIAPKAN TIM PETUALANGMU!</h2>
+    <form id="form-team" onsubmit="event.preventDefault(); saveTeam();" style="display: flex; flex-direction: column; gap: 10px; max-width: 500px;">
+      <label><b>Nama Kelompok:</b></label>
+      <input type="text" id="team-name" required placeholder="Contoh: Tim Robusta Kepahiang" style="padding: 10px; border-radius: 6px; border: 1px solid #CCC;">
+      
+      <label><b>Anggota Tim (Minimal 4 Siswa):</b></label>
+      <input type="text" id="member-1" required placeholder="Anggota 1 (Ketua)" style="padding: 8px; border-radius: 4px; border: 1px solid #CCC;">
+      <input type="text" id="member-2" required placeholder="Anggota 2" style="padding: 8px; border-radius: 4px; border: 1px solid #CCC;">
+      <input type="text" id="member-3" required placeholder="Anggota 3" style="padding: 8px; border-radius: 4px; border: 1px solid #CCC;">
+      <input type="text" id="member-4" required placeholder="Anggota 4" style="padding: 8px; border-radius: 4px; border: 1px solid #CCC;">
+      <input type="text" id="member-5" placeholder="Anggota 5 (Opsional)" style="padding: 8px; border-radius: 4px; border: 1px solid #CCC;">
+      
+      <button type="submit" class="btn btn-primary" style="margin-top: 10px; justify-content: center;" onclick="playBtnSound()">▶ MULAI PETUALANGAN</button>
+    </form>
+  </div>
+
+  <!-- 3. PROLOG -->
+  <div id="screen-prolog" class="screen">
+    <div class="piko-box">
+      <img src="Piko.jpg" alt="Piko" class="piko-avatar-img">[cite: 2]
+      <div class="piko-dialog">
+        <strong>Piko:</strong> “Ayo kita selidiki bagaimana sifat-sifat unggul kopi Kepahiang diwariskan secara genetik!”[cite: 1, 2]
+      </div>
+    </div>
+
+    <div class="card" style="text-align: left; line-height: 1.6; background: var(--cream-card);">
+      <h3 style="color: var(--coffee-brown); margin-bottom: 10px;">Latar Belakang Penyelidikan</h3>
+      <p style="margin-bottom: 15px;">Kabupaten Kepahiang, Bengkulu memiliki kebun kopi yang sangat produktif. Mengapa ada tanaman yang berbatang kokoh dan berbuah lebat, sementara yang lain tidak?</p>
+      <div style="background: white; padding: 15px; border-left: 4px solid var(--accent-green); border-radius: 4px;">
+        <strong>Pertanyaan Masalah:</strong><br>
+        <em>“Bagaimana sifat-sifat tersebut diwariskan melalui kombinasi gamet pada persilangan dihibrid?”</em>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="playBtnSound(); switchScreen('screen-misi1')">🔎 MULAI PENYELIDIKAN</button>
+      <button class="btn btn-brown" onclick="playBtnSound(); switchScreen('screen-map')">🗺️ LIHAT PETA MISI</button>
+    </div>
+  </div>
+
+  <!-- 4. PETA PETUALANGAN -->
+  <div id="screen-map" class="screen">
+    <h2 style="color: var(--coffee-brown); margin-bottom: 10px;">PETA PETUALANGAN GENETIKA</h2>
+    <div class="map-grid">
+      <div id="node-misi1" class="map-node active-node" onclick="playBtnSound(); switchScreen('screen-misi1')">
+        <div style="font-size: 2rem;">🌱</div>
+        <strong>Misi 1</strong>
+        <div style="font-size: 0.8rem;">Selidiki Kebun</div>
+        <span id="status-misi1" style="font-size: 0.75rem; color: var(--accent-blue);">▶ Mulai</span>
+      </div>
+      <div id="node-misi2" class="map-node locked" onclick="playBtnSound(); accessMission('screen-misi2', 2)">
+        <div style="font-size: 2rem;">🧬</div>
+        <strong>Misi 2</strong>
+        <div style="font-size: 0.8rem;">Rahasia Sifat</div>
+        <span id="status-misi2" style="font-size: 0.75rem;">🔒 Terkunci</span>
+      </div>
+      <div id="node-misi3" class="map-node locked" onclick="playBtnSound(); accessMission('screen-misi3', 3)">
+        <div style="font-size: 2rem;">🧪</div>
+        <strong>Misi 3</strong>
+        <div style="font-size: 0.8rem;">Kode Gamet</div>
+        <span id="status-misi3" style="font-size: 0.75rem;">🔒 Terkunci</span>
+      </div>
+      <div id="node-misi4" class="map-node locked" onclick="playBtnSound(); accessMission('screen-misi4', 4)">
+        <div style="font-size: 2rem;">📊</div>
+        <strong>Misi 4</strong>
+        <div style="font-size: 0.8rem;">Analisis Rasio</div>
+        <span id="status-misi4" style="font-size: 0.75rem;">🔒 Terkunci</span>
+      </div>
+      <div id="node-final" class="map-node locked" onclick="playBtnSound(); accessMission('screen-final', 5)">
+        <div style="font-size: 2rem;">🏆</div>
+        <strong>Final Mission</strong>
+        <div style="font-size: 0.8rem;">Dewan Kopi</div>
+        <span id="status-final" style="font-size: 0.75rem;">🔒 Terkunci</span>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-secondary" onclick="playBtnSound(); switchScreen('screen-home')">🏠 KEMBALI KE HOME</button>
+    </div>
+  </div>
+
+  <!-- 5. MISI 1 -->
+  <div id="screen-misi1" class="screen">
+    <div class="piko-box">
+      <img src="Piko.jpg" alt="Piko" class="piko-avatar-img">[cite: 2]
+      <div class="piko-dialog">
+        <strong>Piko:</strong> “Amati 4 tanaman kopi di bawah ini. Tarik label sifat ke kotak tanaman! Jika ingin mengganti, kamu bisa menariknya kembali ke area pilihan di bawah!”[cite: 2, 3]
+      </div>
+    </div>
+
+    <h3>Misi 1: Observasi 4 Variasi Tanaman Kopi</h3>
+
+    <div class="grid-2x2">
+      <div class="card">
+        <h4>Tanaman A</h4>
+        <svg width="100" height="90" viewBox="0 0 100 100">
+          <rect x="45" y="40" width="10" height="50" fill="#4A2E1B"/>
+          <circle cx="35" cy="40" r="20" fill="#2D5A27"/><circle cx="65" cy="40" r="20" fill="#2D5A27"/><circle cx="50" cy="25" r="22" fill="#4CAF50"/>
+          <circle cx="35" cy="45" r="4" fill="#D32F2F"/><circle cx="42" cy="48" r="4" fill="#D32F2F"/><circle cx="58" cy="48" r="4" fill="#D32F2F"/><circle cx="65" cy="45" r="4" fill="#D32F2F"/>
+        </svg>
+        <div class="drop-zone" id="dz-plant-a" data-placeholder="Tarik Label Sifat Ke Sini" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Tarik Label Sifat Ke Sini</div>
+      </div>
+      <div class="card">
+        <h4>Tanaman B</h4>
+        <svg width="100" height="90" viewBox="0 0 100 100">
+          <rect x="45" y="40" width="10" height="50" fill="#4A2E1B"/>
+          <circle cx="35" cy="40" r="20" fill="#2D5A27"/><circle cx="65" cy="40" r="20" fill="#2D5A27"/><circle cx="50" cy="25" r="22" fill="#4CAF50"/>
+          <circle cx="35" cy="45" r="4" fill="#D32F2F"/>
+        </svg>
+        <div class="drop-zone" id="dz-plant-b" data-placeholder="Tarik Label Sifat Ke Sini" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Tarik Label Sifat Ke Sini</div>
+      </div>
+      <div class="card">
+        <h4>Tanaman C</h4>
+        <svg width="100" height="90" viewBox="0 0 100 100">
+          <rect x="47" y="55" width="6" height="35" fill="#8B5A2B"/>
+          <circle cx="40" cy="50" r="14" fill="#4CAF50"/><circle cx="60" cy="50" r="14" fill="#4CAF50"/>
+          <circle cx="42" cy="52" r="4" fill="#D32F2F"/><circle cx="48" cy="55" r="4" fill="#D32F2F"/><circle cx="55" cy="52" r="4" fill="#D32F2F"/>
+        </svg>
+        <div class="drop-zone" id="dz-plant-c" data-placeholder="Tarik Label Sifat Ke Sini" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Tarik Label Sifat Ke Sini</div>
+      </div>
+      <div class="card">
+        <h4>Tanaman D</h4>
+        <svg width="100" height="90" viewBox="0 0 100 100">
+          <rect x="47" y="55" width="6" height="35" fill="#8B5A2B"/>
+          <circle cx="50" cy="50" r="14" fill="#81C784"/>
+          <circle cx="50" cy="52" r="4" fill="#D32F2F"/>
+        </svg>
+        <div class="drop-zone" id="dz-plant-d" data-placeholder="Tarik Label Sifat Ke Sini" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Tarik Label Sifat Ke Sini</div>
+      </div>
+    </div>
+
+    <p style="font-weight: bold; margin-bottom: 5px;">Pilihan Label Sifat (Tarik Kembali Ke Sini Jika Salah):</p>
+    <div class="drag-container" id="misi1-pool" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">
+      <div class="draggable-item" draggable="true" id="drag-a" ondragstart="drag(event)">Kuat + Buah Lebat</div>
+      <div class="draggable-item" draggable="true" id="drag-b" ondragstart="drag(event)">Kuat + Buah Tidak Lebat</div>
+      <div class="draggable-item" draggable="true" id="drag-c" ondragstart="drag(event)">Tidak Kuat + Buah Lebat</div>
+      <div class="draggable-item" draggable="true" id="drag-d" ondragstart="drag(event)">Tidak Kuat + Buah Tidak Lebat</div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="playBtnSound(); checkMisi1()">✔ PERIKSA MISI 1</button>
+      <button class="btn btn-secondary" onclick="playBtnSound(); switchScreen('screen-misi2')">▶ LANJUT KE MISI 2</button>
+    </div>
+  </div>
+
+  <!-- 6. MISI 2 -->
+  <div id="screen-misi2" class="screen">
+    <div class="piko-box">
+      <img src="Piko.jpg" alt="Piko" class="piko-avatar-img">[cite: 2]
+      <div class="piko-dialog">
+        <strong>Piko:</strong> “Misi 2 memiliki 2 jenis tantangan! Kerjakan pencocokan konsep (Drag & Drop) dan kuis pilihan ganda di bawah ini!”[cite: 2, 3]
+      </div>
+    </div>
+
+    <h3 style="color: var(--coffee-brown); margin-bottom: 10px;">Misi 2: Penguasaan Konsep Genetika</h3>
+
+    <!-- KUIS BAGIAN A: DRAG & DROP -->
+    <div class="card" style="text-align: left; margin-bottom: 20px;">
+      <h4 style="color: var(--primary-green); margin-bottom: 10px;">Bagian A: Pasangkan Istilah Genetika (Drag & Drop)</h4>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin: 10px 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #FDFBF7; padding: 10px; border-radius: 6px; border: 1px solid #DDD;">
+          <span>1. Unit pewarisan sifat pada tanaman kopi:</span>
+          <div class="drop-zone" id="dz-gen" data-placeholder="Drop di sini" style="width: 180px;" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop di sini</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #FDFBF7; padding: 10px; border-radius: 6px; border: 1px solid #DDD;">
+          <span>2. Bentuk alternatif gen (contoh: K atau k):</span>
+          <div class="drop-zone" id="dz-alel" data-placeholder="Drop di sini" style="width: 180px;" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop di sini</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #FDFBF7; padding: 10px; border-radius: 6px; border: 1px solid #DDD;">
+          <span>3. Susunan gen pengontrol sifat (contoh: KkLl):</span>
+          <div class="drop-zone" id="dz-genotipe" data-placeholder="Drop di sini" style="width: 180px;" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop di sini</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #FDFBF7; padding: 10px; border-radius: 6px; border: 1px solid #DDD;">
+          <span>4. Sifat yang tampak luar (contoh: Batang Kuat):</span>
+          <div class="drop-zone" id="dz-fenotipe" data-placeholder="Drop di sini" style="width: 180px;" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop di sini</div>
+        </div>
+      </div>
+
+      <p style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Pilihan Istilah (Tarik Kembali Ke Sini Jika Ingin Merubah):</p>
+      <div class="drag-container" id="misi2-pool" style="margin-bottom: 0;" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">
+        <div class="draggable-item" draggable="true" id="m2-gen" ondragstart="drag(event)">GEN</div>
+        <div class="draggable-item" draggable="true" id="m2-alel" ondragstart="drag(event)">ALEL</div>
+        <div class="draggable-item" draggable="true" id="m2-genotipe" ondragstart="drag(event)">GENOTIPE</div>
+        <div class="draggable-item" draggable="true" id="m2-fenotipe" ondragstart="drag(event)">FENOTIPE</div>
+      </div>
+    </div>
+
+    <!-- KUIS BAGIAN B: PILIHAN GANDA -->
+    <div class="card" style="text-align: left; margin-bottom: 15px;">
+      <h4 style="color: var(--primary-green); margin-bottom: 10px;">Bagian B: Kuis Pilihan Ganda</h4>
+      
+      <!-- Soal 1 -->
+      <div style="margin-bottom: 15px;">
+        <p><b>Soal 1:</b> Tanaman kopi berbatang kuat dikodekan oleh alel dominan <b>K</b>, sedangkan batang tidak kuat dikodekan alel resesif <b>k</b>. Manakah genotipe untuk tanaman kopi yang bergenotipe <b>heterozigot</b> untuk sifat batang dan buah?</p>
+        <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="q1" value="A"> A. KKLL</label>
+        <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="q1" value="B"> B. KkLl</label>
+        <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="q1" value="C"> C. kkll</label>
+        <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="q1" value="D"> D. KKLl</label>
+      </div>
+
+      <!-- Soal 2 -->
+      <div>
+        <p><b>Soal 2:</b> Jika alel <b>L</b> mengendalikan sifat buah lebat dan <b>l</b> mengendalikan sifat buah tidak lebat, fenotipe apakah yang dihasilkan oleh genotipe <b>kkLl</b>?</p>
+        <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="q2" value="A"> A. Batang kuat dan buah lebat</label>
+        <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="q2" value="B"> B. Batang kuat dan buah tidak lebat</label>
+        <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="q2" value="C"> C. Batang tidak kuat dan buah lebat</label>
+        <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="q2" value="D"> D. Batang tidak kuat dan buah tidak lebat</label>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="playBtnSound(); checkMisi2()">✔ PERIKSA MISI 2</button>
+      <button class="btn btn-secondary" onclick="playBtnSound(); switchScreen('screen-misi3')">▶ LANJUT KE MISI 3</button>
+    </div>
+  </div>
+
+  <!-- 7. MISI 3 -->
+  <div id="screen-misi3" class="screen">
+    <div class="piko-box">
+      <img src="Piko.jpg" alt="Piko" class="piko-avatar-img">[cite: 2]
+      <div class="piko-dialog">
+        <strong>Piko:</strong> “<strong>Langkah 1:</strong> Pasangkan 8 Kartu Gamet ke kotak header jantan (atas) dan betina (kiri).<br><strong>Langkah 2:</strong> Ketik genotipe keturunan (huruf kapital/kecil akan otomatis dirapikan secara ilmiah).”[cite: 2, 3]
+      </div>
+    </div>
+
+    <h3>Misi 3: Penyusunan Gamet & Punnett Square (4x4)</h3>
+
+    <p style="font-weight: bold; margin-bottom: 5px;">Kartu Gamet Induk (KkLl) — Wadah Kartu Gamet:</p>
+    <div class="drag-container" id="gamet-pool" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">
+      <div class="draggable-item" draggable="true" id="g1-KL" ondragstart="drag(event)">KL</div>
+      <div class="draggable-item" draggable="true" id="g1-Kl" ondragstart="drag(event)">Kl</div>
+      <div class="draggable-item" draggable="true" id="g1-kL" ondragstart="drag(event)">kL</div>
+      <div class="draggable-item" draggable="true" id="g1-kl" ondragstart="drag(event)">kl</div>
+
+      <div class="draggable-item" draggable="true" id="g2-KL" ondragstart="drag(event)">KL</div>
+      <div class="draggable-item" draggable="true" id="g2-Kl" ondragstart="drag(event)">Kl</div>
+      <div class="draggable-item" draggable="true" id="g2-kL" ondragstart="drag(event)">kL</div>
+      <div class="draggable-item" draggable="true" id="g2-kl" ondragstart="drag(event)">kl</div>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table class="punnett-table">
+        <!-- Row Header Jantan -->
+        <tr>
+          <th>♂ \ ♀</th>
+          <th><div class="drop-zone" id="gz-top-1" data-placeholder="Drop Gamet" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop Gamet</div></th>
+          <th><div class="drop-zone" id="gz-top-2" data-placeholder="Drop Gamet" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop Gamet</div></th>
+          <th><div class="drop-zone" id="gz-top-3" data-placeholder="Drop Gamet" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop Gamet</div></th>
+          <th><div class="drop-zone" id="gz-top-4" data-placeholder="Drop Gamet" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop Gamet</div></th>
+        </tr>
+        <!-- Row 1 -->
+        <tr>
+          <th><div class="drop-zone" id="gz-left-1" data-placeholder="Drop Gamet" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop Gamet</div></th>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p1" placeholder="Genotipe" oninput="handleGenotypeInput(1)"><div id="prev-1" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p2" placeholder="Genotipe" oninput="handleGenotypeInput(2)"><div id="prev-2" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p3" placeholder="Genotipe" oninput="handleGenotypeInput(3)"><div id="prev-3" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p4" placeholder="Genotipe" oninput="handleGenotypeInput(4)"><div id="prev-4" class="plant-preview"></div></div></td>
+        </tr>
+        <!-- Row 2 -->
+        <tr>
+          <th><div class="drop-zone" id="gz-left-2" data-placeholder="Drop Gamet" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop Gamet</div></th>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p5" placeholder="Genotipe" oninput="handleGenotypeInput(5)"><div id="prev-5" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p6" placeholder="Genotipe" oninput="handleGenotypeInput(6)"><div id="prev-6" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p7" placeholder="Genotipe" oninput="handleGenotypeInput(7)"><div id="prev-7" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p8" placeholder="Genotipe" oninput="handleGenotypeInput(8)"><div id="prev-8" class="plant-preview"></div></div></td>
+        </tr>
+        <!-- Row 3 -->
+        <tr>
+          <th><div class="drop-zone" id="gz-left-3" data-placeholder="Drop Gamet" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop Gamet</div></th>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p9" placeholder="Genotipe" oninput="handleGenotypeInput(9)"><div id="prev-9" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p10" placeholder="Genotipe" oninput="handleGenotypeInput(10)"><div id="prev-10" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p11" placeholder="Genotipe" oninput="handleGenotypeInput(11)"><div id="prev-11" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p12" placeholder="Genotipe" oninput="handleGenotypeInput(12)"><div id="prev-12" class="plant-preview"></div></div></td>
+        </tr>
+        <!-- Row 4 -->
+        <tr>
+          <th><div class="drop-zone" id="gz-left-4" data-placeholder="Drop Gamet" ondragover="allowDrop(event)" ondragleave="removeHover(event)" ondrop="drop(event)">Drop Gamet</div></th>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p13" placeholder="Genotipe" oninput="handleGenotypeInput(13)"><div id="prev-13" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p14" placeholder="Genotipe" oninput="handleGenotypeInput(14)"><div id="prev-14" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p15" placeholder="Genotipe" oninput="handleGenotypeInput(15)"><div id="prev-15" class="plant-preview"></div></div></td>
+          <td><div class="cell-box"><input type="text" class="punnett-input" id="p16" placeholder="Genotipe" oninput="handleGenotypeInput(16)"><div id="prev-16" class="plant-preview"></div></div></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="playBtnSound(); checkMisi3()">✔ CEK PUNNETT SQUARE</button>
+      <button class="btn btn-secondary" onclick="playBtnSound(); switchScreen('screen-misi4')">▶ LANJUT KE MISI 4</button>
+    </div>
+  </div>
+
+  <!-- 8. MISI 4 -->
+  <div id="screen-misi4" class="screen">
+    <div class="piko-box">
+      <img src="Piko.jpg" alt="Piko" class="piko-avatar-img">[cite: 2]
+      <div class="piko-dialog">
+        <strong>Piko:</strong> “Hitung jumlah fenotipe dari 16 keturunan di Misi 3 dan tentukan perbandingan rasionya!”[cite: 2, 3]
+      </div>
+    </div>
+
+    <h3>Misi 4: Analisis Rasio Fenotipe</h3>
+
+    <div class="card" style="text-align: left;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><label>Kuat + Buah Lebat:</label><input type="number" id="r1" style="width:100%; padding:6px;" oninput="playTypeSound()"></div>
+        <div><label>Kuat + Buah Tidak Lebat:</label><input type="number" id="r2" style="width:100%; padding:6px;" oninput="playTypeSound()"></div>
+        <div><label>Tidak Kuat + Buah Lebat:</label><input type="number" id="r3" style="width:100%; padding:6px;" oninput="playTypeSound()"></div>
+        <div><label>Tidak Kuat + Tidak Lebat:</label><input type="number" id="r4" style="width:100%; padding:6px;" oninput="playTypeSound()"></div>
+      </div>
+      <label><b>Tuliskan Rasio Fenotipe Dihibrid:</b></label>
+      <input type="text" id="ratio-input" style="width:100%; padding:8px; margin-top:5px;" oninput="playTypeSound()">
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="playBtnSound(); checkMisi4()">✔ PERIKSA MISI 4</button>
+      <button class="btn btn-secondary" onclick="playBtnSound(); switchScreen('screen-final')">▶ LANJUT KE FINAL MISSION</button>
+    </div>
+  </div>
+
+  <!-- 9. FINAL MISSION -->
+  <div id="screen-final" class="screen">
+    <div class="piko-box">
+      <img src="Piko.jpg" alt="Piko" class="piko-avatar-img">[cite: 2]
+      <div class="piko-dialog">
+        <strong>Piko:</strong> “Selamat! Kamu diundang ke Sidang Dewan Kopi Kepahiang. Pilih jenis tanaman unggul dari hasil persilangan dihibrid game ini, berikan rekomendasi ilmiah, dan susun kesimpulan kelompokmu!”[cite: 1, 2, 3]
+      </div>
+    </div>
+
+    <h3>Final Mission: Rekomendasi Dewan Kopi & Kesimpulan</h3>
+
+    <!-- TANTANGAN 1 -->
+    <div class="card" style="text-align: left; background: white; margin-bottom: 15px;">
+      <h4 style="color: var(--primary-green); margin-bottom: 8px;">1. Pemilihan Jenis Tanaman Unggul Hasil Dihibrid Game</h4>
+      <p style="margin-bottom: 10px; font-size: 0.95rem;">Berdasarkan hasil persilangan dihibrid antara dua induk heterozigot (KkLl x KkLl) yang telah kamu selesaikan, manakah keturunan yang merupakan <b>Tanaman Unggul Perkebunan Terbaik</b> untuk dikembangkan petani Kepahiang?</p>
+      
+      <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="var-unggul" value="Tanaman Unggul: Batang Kuat + Buah Lebat (Genotipe K_L_)"> <b>A. Tanaman Kopi Berbatang Kuat & Buah Lebat (Genotipe: KKLL, KKLl, KkLL, KkLl)</b></label>
+      <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="var-unggul" value="Tanaman Sedang: Batang Kuat + Buah Tidak Lebat (Genotipe K_ll)"> <b>B. Tanaman Kopi Berbatang Kuat & Buah Tidak Lebat (Genotipe: KKll, Kkll)</b></label>
+      <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="var-unggul" value="Tanaman Sedang: Batang Tidak Kuat + Buah Lebat (Genotipe kkL_)"> <b>C. Tanaman Kopi Berbatang Tidak Kuat & Buah Lebat (Genotipe: kkLL, kkLl)</b></label>
+      <label class="mcq-option" onclick="playBtnSound()"><input type="radio" name="var-unggul" value="Tanaman Lemah: Batang Tidak Kuat + Buah Tidak Lebat (Genotipe kkll)"> <b>D. Tanaman Kopi Berbatang Tidak Kuat & Buah Tidak Lebat (Genotipe: kkll)</b></label>
+    </div>
+
+    <!-- TANTANGAN 2 -->
+    <div class="card" style="text-align: left; background: var(--cream-card); margin-bottom: 15px;">
+      <h4 style="color: var(--coffee-brown); margin-bottom: 8px;">2. Analisis Kasus Dewan Kopi:</h4>
+      <p style="margin-bottom: 8px; font-size: 0.95rem;">“Apakah persilangan bibit unggul saja sudah cukup menjamin hasil panen kopi Kepahiang selalu melimpah?”</p>
+      <textarea id="final-answer" rows="3" style="width:100%; padding:10px; border-radius:6px; border:1px solid #CCC;" placeholder="Tuliskan analisis kelompokmu (Hubungkan genetik unggul dengan faktor lingkungan seperti pemupukan, iklim, pemangkasan, dan tanah)..." oninput="playTypeSound()"></textarea>
+    </div>
+
+    <!-- TANTANGAN 3 -->
+    <div class="card" style="text-align: left; background: white;">
+      <h4 style="color: var(--primary-green); margin-bottom: 8px;">3. Kesimpulan Petualangan Dihibrid Kelompok</h4>
+      <p style="margin-bottom: 8px; font-size: 0.95rem;">Susun kesimpulan ringkas kelompokmu mengenai prinsip persilangan dihibrid (hukum Mendel II / pengelompokan gen secara bebas) pada tanaman kopi Kepahiang!</p>
+      <textarea id="final-conclusion" rows="3" style="width:100%; padding:10px; border-radius:6px; border:1px solid #CCC;" placeholder="Tuliskan kesimpulan kelompokmu di sini..." oninput="playTypeSound()"></textarea>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="playBtnSound(); finishGame()">🏆 SUBMIT FINAL MISSION</button>
+      <button class="btn btn-blue" onclick="playBtnSound(); showResultScreen()">🏆 LIHAT HASIL AKHIR</button>
+    </div>
+  </div>
+
+  <!-- 10. HASIL AKHIR -->
+  <div id="screen-result" class="screen">
+    <div style="text-align: center; margin-bottom: 15px;">
+      <h2>🎉 HASIL PETUALANGAN</h2>
+      <p style="color: var(--coffee-light); font-weight: bold;">🏅 BADGE: PENJELAJAH GENETIKA KOPI KEPAHIANG</p>
+    </div>
+
+    <div class="score-card">
+      <div style="font-size: 1.1rem; font-weight: bold; text-transform: uppercase;">SKOR PETUALANGAN KAMU</div>
+      <div class="score-number" id="res-score-display">0</div>
+      <div class="score-badge" id="res-badge-display">PENDATANG BARU</div>
+      <div id="res-stars-display" style="font-size: 1.8rem; margin-top: 8px;">⭐⭐⭐</div>
+    </div>
+
+    <div class="card" style="text-align: left; margin-bottom: 15px;">
+      <p style="margin-bottom: 8px;"><strong>Nama Kelompok:</strong> <span id="res-team">-</span></p>
+      <p style="margin-bottom: 8px;"><strong>Anggota Tim:</strong> <span id="res-members">-</span></p>
+      <p style="margin-bottom: 8px;"><strong>Status Kelulusan Misi:</strong> <span id="res-progress">0 / 4 Misi Selesai</span></p>
+      <hr style="margin: 10px 0;">
+      <p style="margin-bottom: 6px;"><strong>Jenis Tanaman Unggul Dihibrid Pilihan:</strong> <span id="res-varietas-text" style="color: var(--primary-green); font-weight: bold;">-</span></p>
+      <p style="margin-bottom: 6px;"><strong>Analisis Dewan Kopi:</strong></p>
+      <p id="res-final-text" style="font-style: italic; color: #444; background: #FFF; padding: 8px; border-radius: 4px; border: 1px solid #EEE; margin-bottom: 10px;">-</p>
+      <p style="margin-bottom: 6px;"><strong>Kesimpulan Pembelajaran Dihibrid:</strong></p>
+      <p id="res-conclusion-text" style="font-style: italic; color: #444; background: #FFF; padding: 8px; border-radius: 4px; border: 1px solid #EEE;">-</p>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="playBtnSound(); window.print()">🖨️ CETAK HASIL / SIMPAN PDF</button>
+      <button class="btn btn-secondary" onclick="playBtnSound(); switchScreen('screen-home')">🏠 KEMBALI KE MENU UTAMA</button>
+    </div>
+  </div>
+
+  <!-- 11. TENTANG GAME -->
+  <div id="screen-about" class="screen">
+    <h3>Informasi Media Pembelajaran</h3>
+    <div class="card" style="text-align: left; margin-top: 15px; line-height: 1.6;">
+      <p><strong>KOPIGEN QUEST</strong> dikembangkan untuk melatih pemahaman konsep Genetika dan Persilangan Dihibrid berbasis konteks kearifan lokal perkebunan kopi Kepahiang, Bengkulu.</p>
+      <br>
+      <p><strong>Pengembang Media:</strong> Ibu Sri_B</p>
+      <p><strong>Tahun Rilis:</strong> 2026</p>
+    </div>
+    <div class="action-bar">
+      <button class="btn btn-secondary" onclick="playBtnSound(); switchScreen('screen-home')">🏠 KEMBALI</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* --- SISTEM AUDIO / SFX (WEB AUDIO API) --- */
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  function playBtnSound() {
+    initAudio();
+    if (!audioCtx) return;
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.08);
+  }
+
+  function playDropSound() {
+    initAudio();
+    if (!audioCtx) return;
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.12);
+  }
+
+  function playTypeSound() {
+    initAudio();
+    if (!audioCtx) return;
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.04);
+  }
+
+  function playSuccessSound() {
+    initAudio();
+    if (!audioCtx) return;
+    let notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, idx) => {
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      let startTime = audioCtx.currentTime + (idx * 0.1);
+      gain.gain.setValueAtTime(0.3, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.3);
+    });
+  }
+
+  function playFanfareSound() {
+    initAudio();
+    if (!audioCtx) return;
+    let notes = [523.25, 523.25, 523.25, 659.25, 783.99, 1046.50];
+    let times = [0, 0.12, 0.24, 0.36, 0.48, 0.65];
+    notes.forEach((freq, idx) => {
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      let startTime = audioCtx.currentTime + times[idx];
+      gain.gain.setValueAtTime(0.4, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.4);
+    });
+  }
+
+  function playErrorSound() {
+    initAudio();
+    if (!audioCtx) return;
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.25);
+  }
+
+  /* --- STATE GAME & PERHITUNGAN SKOR --- */
+  let teamData = { name: "", members: [] };
+  let unlockedMission = 1;
+  let missionScores = { m1: 0, m2: 0, m3: 0, m4: 0, final: 0 };
+
+  function calculateTotalScore() {
+    return missionScores.m1 + missionScores.m2 + missionScores.m3 + missionScores.m4 + missionScores.final;
+  }
+
+  function switchScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+  }
+
+  function saveTeam() {
+    const name = document.getElementById('team-name').value;
+    const m1 = document.getElementById('member-1').value;
+    const m2 = document.getElementById('member-2').value;
+    const m3 = document.getElementById('member-3').value;
+    const m4 = document.getElementById('member-4').value;
+    const m5 = document.getElementById('member-5').value;
+
+    if(!name || !m1 || !m2 || !m3 || !m4) {
+      playErrorSound();
+      alert("Harap lengkapi nama kelompok dan minimal 4 anggota tim!");
+      return;
+    }
+
+    teamData.name = name;
+    teamData.members = [m1, m2, m3, m4];
+    if(m5) teamData.members.push(m5);
+
+    document.getElementById('res-team').innerText = teamData.name;
+    document.getElementById('res-members').innerText = teamData.members.join(', ');
+
+    playSuccessSound();
+    switchScreen('screen-prolog');
+  }
+
+  function unlockNextMission(currentMisiNum) {
+    if(currentMisiNum >= unlockedMission) {
+      unlockedMission = currentMisiNum + 1;
+      const nextNode = document.getElementById(`node-misi${unlockedMission}`) || document.getElementById('node-final');
+      const nextStatus = document.getElementById(`status-misi${unlockedMission}`) || document.getElementById('status-final');
+      
+      if(nextNode) nextNode.classList.remove('locked');
+      if(nextStatus) {
+        nextStatus.innerText = "▶ Terbuka";
+        nextStatus.style.color = "var(--accent-blue)";
+      }
+    }
+  }
+
+  function accessMission(screenId, missionNum) {
+    if(missionNum <= unlockedMission) {
+      switchScreen(screenId);
+    } else {
+      playErrorSound();
+      alert("Misi ini masih terkunci! Selesaikan misi sebelumnya terlebih dahulu.");
+    }
+  }
+
+  /* --- MINTA FITUR LENGKAP DRAG AND DROP (BISA DITARIK KEMBALI) --- */
+  function allowDrop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.add('hovered');
+  }
+
+  function removeHover(ev) {
+    ev.currentTarget.classList.remove('hovered');
+  }
+
+  function drag(ev) {
+    initAudio();
+    ev.dataTransfer.setData("text", ev.target.id);
+  }
+
+  function drop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('hovered');
+    const data = ev.dataTransfer.getData("text");
+    const draggedEl = document.getElementById(data);
+
+    if(!draggedEl) return;
+
+    let targetZone = ev.currentTarget;
+    let parentZone = draggedEl.parentElement;
+
+    // 1. Jika di-drop ke Wadah / Pool Utama
+    if(targetZone.classList.contains('drag-container')) {
+      targetZone.appendChild(draggedEl);
+      if(parentZone && parentZone.classList.contains('drop-zone')) {
+        let placeholder = parentZone.getAttribute('data-placeholder');
+        if(placeholder) parentZone.innerText = placeholder;
+      }
+      playDropSound();
+      return;
+    }
+
+    // 2. Jika di-drop ke Kotak Jawaban (Drop Zone)
+    if(targetZone.classList.contains('drop-zone')) {
+      // Jika kotak sasaran sudah terisi kartu lain, kembalikan kartu lama ke container asalnya atau wadah
+      if(targetZone.children.length > 0 && targetZone.children[0] !== draggedEl) {
+        let existingChild = targetZone.children[0];
+        let poolId = targetZone.id.includes('plant') ? 'misi1-pool' : (targetZone.id.includes('gz') ? 'gamet-pool' : 'misi2-pool');
+        document.getElementById(poolId).appendChild(existingChild);
+      }
+
+      // Kosongkan teks placeholder jika ada
+      if(targetZone.innerText === targetZone.getAttribute('data-placeholder')) {
+        targetZone.innerText = "";
+      }
+
+      targetZone.appendChild(draggedEl);
+
+      // Jika asal elemen lama adalah drop zone lain, kembalikan teks placeholder ke tempat asalnya
+      if(parentZone && parentZone.classList.contains('drop-zone') && parentZone !== targetZone) {
+        let placeholder = parentZone.getAttribute('data-placeholder');
+        if(placeholder && parentZone.children.length === 0) parentZone.innerText = placeholder;
+      }
+
+      playDropSound();
+    }
+  }
+
+  /* --- VALIDASI & SKOR MISI 1 --- */
+  function checkMisi1() {
+    const dzA = document.getElementById('dz-plant-a').innerText;
+    const dzB = document.getElementById('dz-plant-b').innerText;
+    const dzC = document.getElementById('dz-plant-c').innerText;
+    const dzD = document.getElementById('dz-plant-d').innerText;
+
+    if(dzA.includes("Kuat + Buah Lebat") &&
+       dzB.includes("Kuat + Buah Tidak Lebat") &&
+       dzC.includes("Tidak Kuat + Buah Lebat") &&
+       dzD.includes("Tidak Kuat + Buah Tidak Lebat")) {
+      missionScores.m1 = 20;
+      playSuccessSound();
+      alert("Hebat! Observasi fenotipe Misi 1 Tepat (+20 Poin)!");
+      unlockNextMission(1);
+      switchScreen('screen-misi2');
+    } else {
+      playErrorSound();
+      alert("Masih ada penataan fenotipe tanaman yang keliru. Kamu bisa menarik kembali label sifat untuk mengganti posisinya!");
+    }
+  }
+
+  /* --- VALIDASI & SKOR MISI 2 --- */
+  function checkMisi2() {
+    const gen = document.getElementById('dz-gen').innerText;
+    const alel = document.getElementById('dz-alel').innerText;
+    const genotipe = document.getElementById('dz-genotipe').innerText;
+    const fenotipe = document.getElementById('dz-fenotipe').innerText;
+
+    const partA_Correct = gen.includes("GEN") && alel.includes("ALEL") && genotipe.includes("GENOTIPE") && fenotipe.includes("FENOTIPE");
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    const q2 = document.querySelector('input[name="q2"]:checked');
+
+    if(!partA_Correct) {
+      playErrorSound();
+      alert("Bagian A (Drag & Drop) belum tepat. Silakan tarik pilihan yang salah kembali ke wadah dan sesuaikan!");
+      return;
+    }
+
+    if(!q1 || !q2) {
+      playErrorSound();
+      alert("Harap jawab seluruh soal Pilihan Ganda pada Bagian B!");
+      return;
+    }
+
+    if(q1.value === "B" && q2.value === "C") {
+      missionScores.m2 = 20;
+      playSuccessSound();
+      alert("Luar biasa! Pemahaman konsep Misi 2 Sempurna (+20 Poin)!");
+      unlockNextMission(2);
+      switchScreen('screen-misi3');
+    } else {
+      playErrorSound();
+      alert("Jawaban pilihan ganda masih ada yang keliru. Coba pelajari kembali!");
+    }
+  }
+
+  /* --- PUNNETT INPUT & VISUAL --- */
+  function formatGenotype(rawText) {
+    let clean = rawText.replace(/[^kkllKKLL]/g, '');
+    let hasBigK = clean.includes('K'), hasSmallK = clean.includes('k'), countK = (clean.match(/k/gi) || []).length;
+    let hasBigL = clean.includes('L'), hasSmallL = clean.includes('l'), countL = (clean.match(/l/gi) || []).length;
+
+    let partK = countK >= 2 ? (hasBigK && hasSmallK ? "Kk" : (hasBigK ? "KK" : "kk")) : (countK === 1 ? (hasBigK ? "K" : "k") : "");
+    let partL = countL >= 2 ? (hasBigL && hasSmallL ? "Ll" : (hasBigL ? "LL" : "ll")) : (countL === 1 ? (hasBigL ? "L" : "l") : "");
+
+    return partK + partL;
+  }
+
+  function handleGenotypeInput(cellIndex) {
+    playTypeSound();
+    const inputEl = document.getElementById(`p${cellIndex}`);
+    let raw = inputEl.value;
+    if (raw.length >= 4) {
+      let formatted = formatGenotype(raw);
+      if(formatted) inputEl.value = formatted;
+    }
+    updatePlantVisual(cellIndex);
+  }
+
+  function updatePlantVisual(cellIndex) {
+    const val = document.getElementById(`p${cellIndex}`).value.trim();
+    const prev = document.getElementById(`prev-${cellIndex}`);
+    if(!val) { prev.innerHTML = ""; return; }
+
+    let isKuat = val.includes('K'), isLebat = val.includes('L');
+    let stemColor = isKuat ? "#4A2E1B" : "#8B5A2B", stemWidth = isKuat ? "8" : "4";
+    let fruitsSVG = isLebat ? `<circle cx="20" cy="25" r="3" fill="#D32F2F"/><circle cx="28" cy="28" r="3" fill="#D32F2F"/><circle cx="32" cy="22" r="3" fill="#D32F2F"/><circle cx="24" cy="18" r="3" fill="#D32F2F"/>` : `<circle cx="25" cy="25" r="3" fill="#D32F2F"/>`;
+
+    prev.innerHTML = `<svg width="50" height="50" viewBox="0 0 50 50"><rect x="23" y="20" width="${stemWidth}" height="28" fill="${stemColor}"/><circle cx="25" cy="18" r="12" fill="#4CAF50"/>${fruitsSVG}</svg>`;
+  }
+
+  /* --- VALIDASI & SKOR MISI 3 --- */
+  function checkMisi3() {
+    const gametSlots = ['gz-top-1','gz-top-2','gz-top-3','gz-top-4','gz-left-1','gz-left-2','gz-left-3','gz-left-4'];
+    let allGametPlaced = gametSlots.every(id => document.getElementById(id)?.children.length > 0);
+
+    if(!allGametPlaced) {
+      playErrorSound();
+      alert("Harap pasangkan seluruh 8 kartu gamet ke kotak header Punnett Square!");
+      return;
+    }
+
+    let filled = true;
+    for(let i = 1; i <= 16; i++) {
+      if(!document.getElementById(`p${i}`).value.trim()) { filled = false; break; }
+    }
+
+    if(filled) {
+      missionScores.m3 = 30;
+      playSuccessSound();
+      alert("Tabel Punnett Square lengkap & sempurna (+30 Poin)!");
+      unlockNextMission(3);
+      switchScreen('screen-misi4');
+    } else {
+      playErrorSound();
+      alert("Harap lengkapi seluruh 16 genotipe keturunan pada tabel Punnett!");
+    }
+  }
+
+  /* --- VALIDASI & SKOR MISI 4 --- */
+  function checkMisi4() {
+    const r1 = document.getElementById('r1').value;
+    const r2 = document.getElementById('r2').value;
+    const r3 = document.getElementById('r3').value;
+    const r4 = document.getElementById('r4').value;
+    const ratioInput = document.getElementById('ratio-input').value.trim();
+
+    if(r1 == 9 && r2 == 3 && r3 == 3 && r4 == 1 && (ratioInput === "9:3:3:1" || ratioInput === "9 : 3 : 3 : 1")) {
+      missionScores.m4 = 20;
+      playSuccessSound();
+      alert("Analisis Rasio Dihibrid Tepat (+20 Poin)!");
+      unlockNextMission(4);
+      switchScreen('screen-final');
+    } else {
+      playErrorSound();
+      alert("Jumlah fenotipe atau format penulisan rasio belum tepat. Cek kembali perhitunganmu!");
+    }
+  }
+
+  /* --- SUBMIT FINAL & PENAMPILAN HASIL --- */
+  function finishGame() {
+    const selectedVar = document.querySelector('input[name="var-unggul"]:checked');
+    const ans = document.getElementById('final-answer').value.trim();
+    const conc = document.getElementById('final-conclusion').value.trim();
+
+    if(!selectedVar) {
+      playErrorSound();
+      alert("Mohon pilih jenis tanaman unggul hasil persilangan dihibrid game!");
+      return;
+    }
+
+    if(!ans) {
+      playErrorSound();
+      alert("Mohon ketikkan rekomendasi/analisis kasus kelompokmu!");
+      return;
+    }
+
+    if(!conc) {
+      playErrorSound();
+      alert("Mohon tuliskan kesimpulan pembelajaran kelompokmu!");
+      return;
+    }
+
+    missionScores.final = 10;
+    document.getElementById('res-varietas-text').innerText = selectedVar.value;
+    document.getElementById('res-final-text').innerText = ans;
+    document.getElementById('res-conclusion-text').innerText = conc;
+    showResultScreen();
+  }
+
+  function showResultScreen() {
+    let totalScore = calculateTotalScore();
+    document.getElementById('res-score-display').innerText = totalScore;
+
+    let badgeText = "PENJELAJAH GENETIKA";
+    let starText = "⭐⭐⭐";
+
+    if(totalScore >= 90) {
+      badgeText = "MASTER GENETIKA KOPI 🏆";
+      starText = "⭐⭐⭐⭐⭐";
+    } else if(totalScore >= 70) {
+      badgeText = "AHLI PEMULIAAN TANAMAN 🥇";
+      starText = "⭐⭐⭐⭐";
+    } else if(totalScore >= 50) {
+      badgeText = "PENJELAJAH MUDA 🌿";
+      starText = "⭐⭐⭐";
+    } else {
+      badgeText = "PEMULA KEBUN KOPI 🌱";
+      starText = "⭐⭐";
+    }
+
+    document.getElementById('res-badge-display').innerText = badgeText;
+    document.getElementById('res-stars-display').innerText = starText;
+
+    let completedCount = 0;
+    if(missionScores.m1 > 0) completedCount++;
+    if(missionScores.m2 > 0) completedCount++;
+    if(missionScores.m3 > 0) completedCount++;
+    if(missionScores.m4 > 0) completedCount++;
+    
+    document.getElementById('res-progress').innerText = `${completedCount} / 4 Misi Selesai (Skor Akhir: ${totalScore}/100)`;
+
+    playFanfareSound();
+    switchScreen('screen-result');
+  }
+</script>
+
+</body>
+</html>
